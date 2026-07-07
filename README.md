@@ -13,16 +13,12 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 
 1. Download the script directly into your local execution path:
    ```bash
-   curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/chups.sh -o ~/.local/bin/chups.sh```
+   curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/chups.sh -o ~/.local/bin/chups```
 
 2. Make the script executable:
 
     ```bash
-    chmod +x ~/.local/bin/chups.sh```
-
-(Optional) Add a convenient shell alias to your ~/.bashrc or ~/.zshrc:
-
-    alias chups="~/.local/bin/chups.sh"```
+    chmod +x ~/.local/bin/chups```
 
 ## Usage: 
 
