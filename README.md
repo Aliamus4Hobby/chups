@@ -1,4 +1,4 @@
-# chups (Network UPS Tools CLI Utility)
+# chups "Check UPS" (Network UPS Tools CLI Utility)
 
 A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`upsc`). It offers quick single-line status reporting, a live dashboard, and automated multi-init driver stack recovery during hardware lockups.
 
@@ -11,10 +11,13 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 
 ## Installation
 
-1. Clone or download `check_ups.sh` into your execution path (e.g., `~/.local/bin/` or `/usr/local/bin/`).
+1. Clone or download `chups.sh` into your execution path (e.g., `~/.local/bin/` or `/usr/local/bin/`).
+	
+	`curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/check_ups.sh -o ~/.local/bin/chups && chmod +x ~/.local/bin/chups`
+
 2. Make the script executable:
 
-   chmod +x check_ups.sh
+    `chmod +x chups.sh`
 
 (Optional) Add a convenient shell alias to your ~/.bashrc or ~/.zshrc:
 
