@@ -13,12 +13,12 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 
 1. Download the script directly into your local execution path:
    ```bash
-   curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/chups.sh -o ~/.local/bin/chups```
+   curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/chups.sh -o ~/.local/bin/chups
 
 2. Make the script executable:
 
     ```bash
-    chmod +x ~/.local/bin/chups```
+    chmod +x ~/.local/bin/chups
 
 ## Usage: 
 
@@ -41,7 +41,7 @@ Standard status check:
 
 	```bash
 	$ chups
-	UPS [myups] Charge: 100%```
+	UPS [myups] Charge: 100%
 
 ## "Fun" pipeline integrations:
 	
@@ -54,7 +54,7 @@ Standard status check:
         	 \  (oo)\_______
             	(__)\       )\/\
                 	||----w |
-                	||     ||```
+                	||     ||
 
 
 Disclaimer: This was 99% halucinated by an LLM use at your own risk.
