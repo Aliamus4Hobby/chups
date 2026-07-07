@@ -13,7 +13,7 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 
 1. Download the script directly into your local execution path:
    ```bash
-   curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/chups.sh -o ~/.local/bin/chups
+   curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/chups -o ~/.local/bin/chups
 
 2. Make the script executable:
 
