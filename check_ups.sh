@@ -93,7 +93,7 @@ run_continuous_dashboard() {
     # Draw the frame exactly once
     clear
     echo "====================================="
-    echo "   UPS Battery Monitor (btop mode)   "
+    echo "   UPS Battery Monitor               "
     echo "   Device Targeted: $LOCAL_UPS       "
     echo "   Press Ctrl+C to close and exit    "
     echo "====================================="
