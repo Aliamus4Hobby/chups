@@ -39,13 +39,13 @@ Examples
 
 Standard status check:
 
-	```bash
+	
 	$ chups
 	UPS [myups] Charge: 100%
 
 ## "Fun" pipeline integrations:
 	
-	```bash
+	
 	$ chups | cowsay
  	______________________
 	< UPS [mgeups] Charge: 95% >
