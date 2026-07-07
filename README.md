@@ -16,8 +16,7 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 
    chmod +x check_ups.sh
 
-    (Optional) Add a convenient shell alias to your ~/.bashrc or ~/.zshrc:
-    Bash
+(Optional) Add a convenient shell alias to your ~/.bashrc or ~/.zshrc:
 
     alias chups="~/.local/bin/check_ups.sh"
 
@@ -26,9 +25,13 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 chups [OPTIONS]
 
 Options:
+
   -r, --restart       Force-restart the NUT driver stack based on local system layout
+  
   -c, --continuous    Launch the fullscreen btop-style monitoring dashboard
+  
   -h, --help          Show this help message
+  
 
 Note: Running 'chups' without options prints the charge once and exits.
 
