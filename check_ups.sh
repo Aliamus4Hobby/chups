@@ -1,0 +1,150 @@
+#!/bin/bash
+
+# --- 1. DYNAMIC CONFIGURATION LAYER ---
+# Dynamically locate the first configured UPS on this machine
+LOCAL_UPS=$(upsc -l 2>/dev/null | head -n 1)
+
+# Function to safely reset services regardless of init system
+restart_nut() {
+    echo "[CHUPS] Initiating manual NUT driver stack reset..."
+
+    if [ -z "$LOCAL_UPS" ]; then
+        echo "  → WARNING: No local UPS defined in configurations yet."
+    fi
+
+    # Check for systemd
+    if command -v systemctl >/dev/null 2>&1; then
+        echo "  → Detected systemd. Restarting via systemctl..."
+        sudo systemctl restart nut-driver.target
+        sudo systemctl restart nut-server.service
+
+    # Check for classic SysVinit / OpenRC / Custom init script architectures
+    elif [ -x /etc/init.d/nut-server ] || [ -x /etc/init.d/upsd ]; then
+        echo "  → Detected SysVinit/OpenRC. Restarting via init scripts..."
+        [ -x /etc/init.d/nut-driver ] && sudo /etc/init.d/nut-driver restart
+        [ -x /etc/init.d/nut-server ] && sudo /etc/init.d/nut-server restart
+        [ -x /etc/init.d/upsd ] && sudo /etc/init.d/upsd restart
+
+    # Unraid / Slackware / Fallback direct driver execution
+    elif command -v upsdrvctl >/dev/null 2>&1; then
+        echo "  → System manager unknown. Attempting direct driver recycle via upsdrvctl..."
+        sudo upsdrvctl stop
+        sudo upsdrvctl start
+        if command -v upsd >/dev/null 2>&1; then
+            sudo upsd -c reload
+        fi
+    else
+        echo "  → CRITICAL: Could not determine service manager to recycle drivers."
+        exit 1
+    fi
+
+    echo -e "[CHUPS] Driver stack reset sequence completed!\n"
+    sleep 1
+}
+
+# Function to safely query battery charge line
+get_charge_line() {
+    if [ -z "$LOCAL_UPS" ]; then
+        return 1
+    fi
+    upsc "$LOCAL_UPS" 2>/dev/null | grep battery.charge
+}
+
+# Function to print the charge exactly once and exit (Now the default action!)
+print_once() {
+    CHARGE_LINE=$(get_charge_line)
+    if [ ! -z "$CHARGE_LINE" ]; then
+        CHARGE_VAL=$(echo "$CHARGE_LINE" | awk '{print $2}')
+        echo "UPS [${LOCAL_UPS}] Charge: ${CHARGE_VAL}%"
+        exit 0
+    else
+        echo "UPS Status: [Error connecting to NUT daemon or device missing]"
+        exit 1
+    fi
+}
+
+# Function to kick off the fullscreen continuous monitor mode
+run_continuous_dashboard() {
+    # Ensure a UPS actually exists before spinning up the UI loop
+    if [ -z "$LOCAL_UPS" ]; then
+        echo "Error: No local UPS found via 'upsc -l' to monitor continuously."
+        exit 1
+    fi
+
+    cleanup() {
+        # Force cursor restoration and buffer removal directly to the terminal screen
+        tput rmcup > /dev/tty
+        tput cnorm > /dev/tty
+
+        if [ ! -z "$LAST_CHARGE" ]; then
+            echo "UPS Monitor Closed. Last State -> $LAST_CHARGE" > /dev/tty
+        else
+            echo "UPS Monitor Closed." > /dev/tty
+        fi
+        exit 0
+    }
+
+    trap cleanup SIGINT
+
+    # Switch to alternate fullscreen buffer and hide cursor
+    tput smcup
+    tput civis
+
+    # Draw the frame exactly once
+    clear
+    echo "====================================="
+    echo "   UPS Battery Monitor (btop mode)   "
+    echo "   Device Targeted: $LOCAL_UPS       "
+    echo "   Press Ctrl+C to close and exit    "
+    echo "====================================="
+    echo ""
+
+    LAST_CHARGE=""
+
+    while true; do
+        # Fetch data using the dynamically set device name
+        NEW_CHARGE=$(get_charge_line)
+
+        tput cup 5 0
+        tput el
+
+        if [ ! -z "$NEW_CHARGE" ]; then
+            LAST_CHARGE="$NEW_CHARGE"
+            echo "  Current Status:  $NEW_CHARGE"
+        else
+            echo "  Current Status:  [Error connecting to NUT daemon]"
+        fi
+
+        sleep 1
+    done
+}
+
+# --- 2. ARGUMENT PARSING LAYER ---
+case "$1" in
+    -r|--restart)
+        restart_nut
+        print_once
+        ;;
+    -c|--continuous)
+        run_continuous_dashboard
+        ;;
+    -h|--help)
+        echo "Usage: chups [OPTIONS]"
+        echo "Options:"
+        echo "  -r, --restart       Force-restart the NUT driver stack based on local system layout"
+        echo "  -c, --continuous    Launch the fullscreen btop-style monitoring dashboard"
+        echo "  -h, --help          Show this help message"
+        echo ""
+        echo "Note: Running 'chups' without options prints the charge once and exits."
+        exit 0
+        ;;
+    "")
+        # Default action when no flags are supplied!
+        print_once
+        ;;
+    *)
+        echo "Unknown option: $1"
+        echo "Use 'chups --help' for usage."
+        exit 1
+        ;;
+esac
