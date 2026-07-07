@@ -11,17 +11,18 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 
 ## Installation
 
-1. Clone or download `chups.sh` into your execution path (e.g., `~/.local/bin/` or `/usr/local/bin/`).
-	
-	```curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/check_ups.sh -o ~/.local/bin/chups && chmod +x ~/.local/bin/chups```
+1. Download the script directly into your local execution path:
+   ```bash
+   curl -sSL https://raw.githubusercontent.com/Aliamus4Hobby/chups/main/chups.sh -o ~/.local/bin/chups.sh```
 
 2. Make the script executable:
 
-    ```chmod +x chups.sh```
+    ```bash
+    chmod +x ~/.local/bin/chups.sh```
 
 (Optional) Add a convenient shell alias to your ~/.bashrc or ~/.zshrc:
 
-    alias chups="~/.local/bin/check_ups.sh"
+    alias chups="~/.local/bin/chups.sh"```
 
 ## Usage: 
 
@@ -42,20 +43,22 @@ Examples
 
 Standard status check:
 
+	```bash
 	$ chups
-	UPS [myups] Charge: 100%
+	UPS [myups] Charge: 100%```
 
 ## "Fun" pipeline integrations:
-
-$ chups | cowsay
- ______________________
-< UPS [mgeups] Charge: 95% >
- ----------------------
-        \   ^__^
-         \  (oo)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     ||
+	
+	```bash
+	$ chups | cowsay
+ 	______________________
+	< UPS [mgeups] Charge: 95% >
+	 ----------------------
+        	\   ^__^
+        	 \  (oo)\_______
+            	(__)\       )\/\
+                	||----w |
+                	||     ||```
 
 
 Disclaimer: This was 99% halucinated by an LLM use at your own risk.
