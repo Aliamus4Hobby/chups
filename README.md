@@ -4,7 +4,8 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 
 ## Features
 
-- **Default Mode**: Prints a single, clean line showing current battery charge—perfect for scripting, desktop status modules, or piping into tools like `cowsay`.
+- **Default Mode**: Prints a single, clean line showing current battery charge, for scripting, desktop status modules, or piping into tools like `cowsay`.
+- **emoji Mode**: Same as Default, but prints a representative emoji along with the current battery charge percentage.
 - **Continuous Monitoring (`-c`)**: Launches an interactive, alternate-buffer live fullscreen dashboard that updates dynamically every second without polluting your terminal scrollback history.
 - **Hardware Stack Reset (`-r`)**: Dynamically detects your system init architecture (`systemd`, `OpenRC/SysVinit`, or raw `upsdrvctl` binaries) to force-cycle a frozen USB connection during power transition anomalies.
 - **Platform Agnostic**: Auto-discovers the local active UPS profile name dynamically via `upsc -l`.
@@ -30,7 +31,9 @@ Options:
   
   -c, --continuous    Launch the fullscreen btop-style monitoring dashboard
   
-  -h, --help          Show this help message
+  -h, --help          Show this help message 
+    
+  -e, --emoji         Print the corrent state of charge with an emoji ("🔋" for full / good enough, "🪫" for low battery, "⚠" for critical.
   
 
 Note: Running 'chups' without options prints the charge once and exits.
