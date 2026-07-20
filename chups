@@ -50,7 +50,7 @@ get_charge_line() {
     upsc "$LOCAL_UPS" 2>/dev/null | grep battery.charge
 }
 
-# Function to print the charge exactly once and exit (Now the default action!)
+# Standard single-run output for Konsole/Terminal
 print_once() {
     CHARGE_LINE=$(get_charge_line)
     if [ ! -z "$CHARGE_LINE" ]; then
@@ -59,6 +59,29 @@ print_once() {
         exit 0
     else
         echo "UPS Status: [Error connecting to NUT daemon or device missing]"
+        exit 1
+    fi
+}
+
+# Compact output with emojis optimized for desktop widgets/panels
+print_emoji() {
+    CHARGE_LINE=$(get_charge_line)
+    if [ ! -z "$CHARGE_LINE" ]; then
+        CHARGE_VAL=$(echo "$CHARGE_LINE" | awk '{print $2}')
+        
+        # Pick an emoji based on charge thresholds
+        if [ "$CHARGE_VAL" -ge 75 ]; then
+            ICON="🔋"  # Full / Good
+        elif [ "$CHARGE_VAL" -ge 35 ]; then
+            ICON="🪫"  # Low battery
+        else
+            ICON="⚠️"  # Critical warning
+        fi
+
+        echo "$ICON ${CHARGE_VAL}%"
+        exit 0
+    else
+        echo "🔌 N/A"
         exit 1
     fi
 }
@@ -121,6 +144,9 @@ run_continuous_dashboard() {
 
 # --- 2. ARGUMENT PARSING LAYER ---
 case "$1" in
+    -e|--emoji)
+        print_emoji
+        ;;
     -r|--restart)
         restart_nut
         print_once
@@ -131,11 +157,12 @@ case "$1" in
     -h|--help)
         echo "Usage: chups [OPTIONS]"
         echo "Options:"
+        echo "  -e, --emoji         Print compact charge with battery emoji (ideal for desktop widgets)"
         echo "  -r, --restart       Force-restart the NUT driver stack based on local system layout"
         echo "  -c, --continuous    Launch the fullscreen btop-style monitoring dashboard"
         echo "  -h, --help          Show this help message"
         echo ""
-        echo "Note: Running 'chups' without options prints the charge once and exits."
+        echo "Note: Running 'chups' without options prints the detailed status once and exits."
         exit 0
         ;;
     "")
