@@ -66,9 +66,9 @@ Standard status check:
                 	||     ||
 
 
-!["Chups -e" in action within the Command output widget (KDE)](images/chups_-e_in_action.png)
+!["chups -e" in action within the Command output widget (KDE)](images/chups_-e_in_action.png)
 
-"Chups -e" in action within the Command output widget (KDE)
+"chups -e" in action within the Command output widget (KDE)
 
 
 Disclaimer: This was 99% halucinated by an LLM use at your own risk.
