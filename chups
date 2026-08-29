@@ -133,13 +133,18 @@ print_status() {
                     READABLE_TIME=$(format_seconds "$CHRG_TIME")
                     echo "Status: Online (Charging: ${CHARGE:-?}% ) | Est. Time to 100%: ${READABLE_TIME}"
                 elif [ -n "$CHARGE" ]; then
-                    # 2. Fallback: Estimate charge time based on typical 4-hour 0-100% recharge curve
+                    # Fallback: Non-linear calculation based on a ~12-hour full recharge curve
                     MISSING_PCT=$((100 - CHARGE))
                     
-                    # Typical standard UPS recharge rate is ~144 seconds per 1% capacity
-                    EST_SECONDS=$((MISSING_PCT * 144))
-                    READABLE_TIME=$(format_seconds "$EST_SECONDS")
+                    if [ "$CHARGE" -ge 99 ]; then
+                        # The final 1% trickle saturation stage takes ~1 hour (3600 seconds)
+                        EST_SECONDS=3600
+                    else
+                        # Bulk stage scaling (~396 seconds per 1% for the remaining 99%)
+                        EST_SECONDS=$(( (MISSING_PCT - 1) * 396 + 3600 ))
+                    fi
                     
+                    READABLE_TIME=$(format_seconds "$EST_SECONDS")
                     echo "Status: Online (Charging: ${CHARGE}% ) | Est. Time to 100%: ~${READABLE_TIME} (calculated)"
                 else
                     echo "Status: Online (Charging)"
