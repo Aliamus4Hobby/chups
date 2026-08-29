@@ -5,7 +5,9 @@ A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`up
 ## Features
 
 - **Default Mode**: Prints a single, clean line showing current battery charge, for scripting, desktop status modules, or piping into tools like `cowsay`.
-- **emoji Mode**: Same as Default, but prints a representative emoji along with the current battery charge percentage.
+- **emoji Mode (`-e`)**: Same as Default, but prints a representative emoji along with the current battery charge percentage.
+- **Name & Model (`-n`)**: Prints the make and model of the UPS.
+- **Status (`-s`)**: Exposes the status of the UPS, (Online/Offline), If it's charging or discharging, for how long can it maintain the devices on battery power, and how long till charge is at 100% when charging.
 - **Continuous Monitoring (`-c`)**: Launches an interactive, alternate-buffer live fullscreen dashboard that updates dynamically every second without polluting your terminal scrollback history.
 - **Hardware Stack Reset (`-r`)**: Dynamically detects your system init architecture (`systemd`, `OpenRC/SysVinit`, or raw `upsdrvctl` binaries) to force-cycle a frozen USB connection during power transition anomalies.
 - **Platform Agnostic**: Auto-discovers the local active UPS profile name dynamically via `upsc -l`.
@@ -32,7 +34,11 @@ Options:
   -c, --continuous    Launch the fullscreen btop-style monitoring dashboard
   
   -h, --help          Show this help message 
-    
+
+  -N, --name		  Show make and model.
+
+  -S, --status		  Print UPS status and time estimates, (time till depletion, or full).
+
   -e, --emoji         Print the corrent state of charge with an emoji ("🔋" for full / good enough, "🪫" for low battery, "⚠" for critical.
   
 
