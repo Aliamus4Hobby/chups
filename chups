@@ -42,12 +42,115 @@ restart_nut() {
     sleep 1
 }
 
+# Function to safely query raw output from upsc
+get_ups_var() {
+    if [ -z "$LOCAL_UPS" ]; then
+        return 1
+    fi
+    upsc "$LOCAL_UPS" "$1" 2>/dev/null
+}
+
 # Function to safely query battery charge line
 get_charge_line() {
     if [ -z "$LOCAL_UPS" ]; then
         return 1
     fi
     upsc "$LOCAL_UPS" 2>/dev/null | grep battery.charge
+}
+
+# Print hardware Manufacturer & Model
+print_name_model() {
+    if [ -z "$LOCAL_UPS" ]; then
+        echo "UPS Name/Model: [Error connecting to NUT daemon or device missing]"
+        exit 1
+    fi
+
+    MFR=$(get_ups_var "device.mfr")
+    MODEL=$(get_ups_var "device.model")
+    
+    # Fallback checks if specific key naming varies in driver output
+    [ -z "$MFR" ] && MFR=$(get_ups_var "ups.mfr")
+    [ -z "$MODEL" ] && MODEL=$(get_ups_var "ups.model")
+
+    if [ -n "$MFR" ] || [ -n "$MODEL" ]; then
+        echo "UPS Hardware: ${MFR:-Generic} ${MODEL:-UPS}"
+        exit 0
+    else
+        echo "UPS Hardware: [Device parameters missing or unsupported by driver]"
+        exit 1
+    fi
+}
+
+# Print power state and runtime / charge timing details
+print_status() {
+    if [ -z "$LOCAL_UPS" ]; then
+        echo "UPS Status: [Error connecting to NUT daemon or device missing]"
+        exit 1
+    fi
+
+    STATUS=$(get_ups_var "ups.status")
+    RUNTIME=$(get_ups_var "battery.runtime")
+    CHARGE=$(get_ups_var "battery.charge")
+
+    if [ -z "$STATUS" ]; then
+        echo "UPS Status: Unknown"
+        exit 1
+    fi
+
+    # Helper function to convert raw seconds to human readable (e.g. 1h 15m or 42m 10s)
+    format_seconds() {
+        local total_sec=$1
+        local hours=$((total_sec / 3600))
+        local mins=$(((total_sec % 3600) / 60))
+        local secs=$((total_sec % 60))
+
+        if [ "$hours" -gt 0 ]; then
+            echo "${hours}h ${mins}m"
+        elif [ "$mins" -gt 0 ]; then
+            echo "${mins}m ${secs}s"
+        else
+            echo "${secs}s"
+        fi
+    }
+
+    case "$STATUS" in
+        *OB*) # On Battery mode
+            if [ -n "$RUNTIME" ]; then
+                READABLE_TIME=$(format_seconds "$RUNTIME")
+                echo "Status: On Battery (Discharging) | Est. Remaining Runtime: ${READABLE_TIME}"
+            else
+                echo "Status: On Battery (Discharging) | Runtime calculation unavailable"
+            fi
+            ;;
+        *OL*|*CHRG*) # Online / Wall Power
+            if [ -n "$CHARGE" ] && [ "$CHARGE" -ge 100 ]; then
+                echo "Status: Online (Fully Charged - 100%)"
+            else
+                # 1. Check for explicit charge time driver key if exposed natively
+                CHRG_TIME=$(get_ups_var "battery.chargetime")
+                
+                if [ -n "$CHRG_TIME" ] && [ "$CHRG_TIME" -gt 0 ]; then
+                    READABLE_TIME=$(format_seconds "$CHRG_TIME")
+                    echo "Status: Online (Charging: ${CHARGE:-?}% ) | Est. Time to 100%: ${READABLE_TIME}"
+                elif [ -n "$CHARGE" ]; then
+                    # 2. Fallback: Estimate charge time based on typical 4-hour 0-100% recharge curve
+                    MISSING_PCT=$((100 - CHARGE))
+                    
+                    # Typical standard UPS recharge rate is ~144 seconds per 1% capacity
+                    EST_SECONDS=$((MISSING_PCT * 144))
+                    READABLE_TIME=$(format_seconds "$EST_SECONDS")
+                    
+                    echo "Status: Online (Charging: ${CHARGE}% ) | Est. Time to 100%: ~${READABLE_TIME} (calculated)"
+                else
+                    echo "Status: Online (Charging)"
+                fi
+            fi
+            ;;
+        *)
+            echo "Status: $STATUS"
+            ;;
+    esac
+    exit 0
 }
 
 # Standard single-run output for Konsole/Terminal
@@ -144,6 +247,12 @@ run_continuous_dashboard() {
 
 # --- 2. ARGUMENT PARSING LAYER ---
 case "$1" in
+    -n|--name)
+        print_name_model
+        ;;
+    -s|--status)
+        print_status
+        ;;
     -e|--emoji)
         print_emoji
         ;;
@@ -157,6 +266,8 @@ case "$1" in
     -h|--help)
         echo "Usage: chups [OPTIONS]"
         echo "Options:"
+        echo "  -n, --name          Print manufacturer and model details"
+        echo "  -s, --status        Print detailed power status and estimated battery runtime/charge time"
         echo "  -e, --emoji         Print compact charge with battery emoji (ideal for desktop widgets)"
         echo "  -r, --restart       Force-restart the NUT driver stack based on local system layout"
         echo "  -c, --continuous    Launch the fullscreen btop-style monitoring dashboard"
