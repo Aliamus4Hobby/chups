@@ -145,7 +145,7 @@ print_status() {
                     fi
                     
                     READABLE_TIME=$(format_seconds "$EST_SECONDS")
-                    echo "Status: Online (Charging: ${CHARGE}% ) | Est. Time to 100%: ~${READABLE_TIME} (calculated)"
+                    echo "Status: Online (Charging: ${CHARGE}% ) | Est. Time to 100%: ~${READABLE_TIME}"
                 else
                     echo "Status: Online (Charging)"
                 fi
