@@ -117,21 +117,33 @@ print_status() {
         *OB*) # On Battery mode
             if [ -n "$RUNTIME" ]; then
                 READABLE_TIME=$(format_seconds "$RUNTIME")
-                echo "Status: On Battery (Discharging) | Est. Remaining Runtime: ${READABLE_TIME}"
+                # Calculate usable time accounting for standard 20% low battery threshold
+                USABLE_SEC=$(( RUNTIME * 80 / 100 ))
+                READABLE_USABLE=$(format_seconds "$USABLE_SEC")
+                echo "Status: On Battery (Discharging) | Est. Remaining: ${READABLE_TIME} (~${READABLE_USABLE} until shutdown)"
             else
                 echo "Status: On Battery (Discharging) | Runtime calculation unavailable"
             fi
             ;;
         *OL*|*CHRG*) # Online / Wall Power
+            # Format runtime string if available from UPS
+            RUN_STR=""
+            if [ -n "$RUNTIME" ]; then
+                READABLE_TIME=$(format_seconds "$RUNTIME")
+                USABLE_SEC=$(( RUNTIME * 80 / 100 ))
+                READABLE_USABLE=$(format_seconds "$USABLE_SEC")
+                RUN_STR=" | Est. Full Runtime: ${READABLE_TIME} (~${READABLE_USABLE} until shutdown)"
+            fi
+
             if [ -n "$CHARGE" ] && [ "$CHARGE" -ge 100 ]; then
-                echo "Status: Online (Fully Charged - 100%)"
+                echo "Status: Online (Fully Charged - 100%)${RUN_STR}"
             else
                 # 1. Check for explicit charge time driver key if exposed natively
                 CHRG_TIME=$(get_ups_var "battery.chargetime")
                 
                 if [ -n "$CHRG_TIME" ] && [ "$CHRG_TIME" -gt 0 ]; then
                     READABLE_TIME=$(format_seconds "$CHRG_TIME")
-                    echo "Status: Online (Charging: ${CHARGE:-?}% ) | Est. Time to 100%: ${READABLE_TIME}"
+                    echo "Status: Online (Charging: ${CHARGE:-?}% )${RUN_STR} | Est. Time to 100%: ${READABLE_TIME}"
                 elif [ -n "$CHARGE" ]; then
                     # Fallback: Non-linear calculation based on a ~12-hour full recharge curve
                     MISSING_PCT=$((100 - CHARGE))
@@ -145,9 +157,9 @@ print_status() {
                     fi
                     
                     READABLE_TIME=$(format_seconds "$EST_SECONDS")
-                    echo "Status: Online (Charging: ${CHARGE}% ) | Est. Time to 100%: ~${READABLE_TIME}"
+                    echo "Status: Online (Charging: ${CHARGE}% )${RUN_STR} | Est. Time to 100%: ~${READABLE_TIME}"
                 else
-                    echo "Status: Online (Charging)"
+                    echo "Status: Online (Charging)${RUN_STR}"
                 fi
             fi
             ;;
