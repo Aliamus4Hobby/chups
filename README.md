@@ -1,3 +1,5 @@
+⚠️ Disclaimer: This was mostly hallucinated by an LLM use at your own risk. ⚠️
+
 # chups "Check UPS" (Network UPS Tools CLI Utility)
 
 A lightweight, platform-agnostic Bash utility wrapper for Network UPS Tools (`upsc`). It offers quick single-line status reporting, a live dashboard, and automated multi-init driver stack recovery during hardware lockups.
@@ -39,7 +41,7 @@ Options:
 
   -S, --status		  Print UPS status and time estimates, (time till depletion, or full).
 
-  -e, --emoji         Print the corrent state of charge with an emoji ("🔋" for full / good enough, "🪫" for low battery, "⚠" for critical.
+  -e, --emoji         Print the corrent state of charge with an emoji ("🔋" for full / good enough, "🪫" for low battery, "⚠️" for critical.
   
 
 Note: Running 'chups' without options prints the charge once and exits.
@@ -70,5 +72,3 @@ Standard status check:
 
 "chups -e" in action within the Command output widget (KDE)
 
-
-Disclaimer: This was 99% halucinated by an LLM use at your own risk.
